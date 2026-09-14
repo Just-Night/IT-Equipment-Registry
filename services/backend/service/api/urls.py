@@ -25,9 +25,8 @@ else:
 
 # Додавання статичних і медіа файлів
 if settings.DEBUG:
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT,
-    )
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 # Beautiful 403 inside the admin layout (see apps/admin/errors.py).
 handler403 = 'apps.admin.errors.permission_denied'
