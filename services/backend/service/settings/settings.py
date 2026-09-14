@@ -348,7 +348,7 @@ IMPORT_EXPORT_FORMATS = [import_export_base_formats.CSV, import_export_base_form
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'uk'
-TIME_ZONE = 'Europe/Kyiv'
+TIME_ZONE = 'Europe/Kiev'
 USE_I18N = True
 USE_TZ = True
 
