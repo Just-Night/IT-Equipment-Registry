@@ -44,4 +44,4 @@ services:
 #      - pgadmin-data:/var/lib/pgadmin
 
 volumes:
-  postgres_data:
+  postgres_data_it_tools:
