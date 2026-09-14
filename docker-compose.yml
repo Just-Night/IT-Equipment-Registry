@@ -15,7 +15,7 @@ services:
       - ./services/backend/service/backend-static:/home/appuser/project/backend-static/
       - ./services/backend/service/settings:/home/appuser/project/settings/
     env_file:
-      - ./services/backend/.env
+      - .env
     command: ['sh', '/home/appuser/project/local.entrypoint.sh']
     ports:
       - '8000:8000'
