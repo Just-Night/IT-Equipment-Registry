@@ -37,6 +37,7 @@ pytest==8.3.4
 pytest-django==4.9.0
 factory-boy==3.3.1
 
-# Stage 4b: PDF reports (apps/reports/pdf.py)
 weasyprint==70.0
 pypdf==6.18.1
+
+whitenoise

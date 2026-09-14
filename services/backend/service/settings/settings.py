@@ -93,8 +93,10 @@ if DEBUG:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,7 +104,6 @@ MIDDLEWARE = [
     'simple_history.middleware.HistoryRequestMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
@@ -406,13 +407,20 @@ if USE_S3:
     }
 
 else:
-    STATIC_DIR = 'backend-static'
-    STATIC_URL = f'/api/{STATIC_DIR}/'
-    STATIC_ROOT = os.path.join(BASE_DIR, STATIC_DIR)
+    STATIC_URL = "/static/"
+    STATIC_ROOT = BASE_DIR / "backend-static"
 
-    MEDIA_DIR = 'media'
-    MEDIA_URL = f'/api/{MEDIA_DIR}/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_DIR)
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
 
 # Project static sources (collected into STATIC_ROOT / S3 by collectstatic).
 STATICFILES_DIRS = [BASE_DIR / 'static']
