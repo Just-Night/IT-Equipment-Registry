@@ -1,0 +1,42 @@
+services:
+  app:
+    restart: always
+    tty: true
+    build:
+      context: ./services/backend/
+    container_name: app
+    volumes:
+      - ./services/backend/service/api:/home/appuser/project/api/
+      - ./services/backend/service/apps:/home/appuser/project/apps/
+      - ./services/backend/service/libs:/home/appuser/project/libs/
+      - ./services/backend/service/media:/home/appuser/project/media/
+      - ./services/backend/service/templates:/home/appuser/project/templates/
+      - ./services/backend/service/static:/home/appuser/project/static/
+      - ./services/backend/service/backend-static:/home/appuser/project/backend-static/
+      - ./services/backend/service/settings:/home/appuser/project/settings/
+      - ./services/backend/service/tests:/home/appuser/project/tests/
+      - ./services/backend/service/pytest.ini:/home/appuser/project/pytest.ini
+    env_file:
+      - ./services/backend/.env
+    command: ['sh', '/home/appuser/project/local.entrypoint.sh']
+    ports:
+      - '8000:8000'
+    depends_on:
+      - pgdb
+
+  pgdb:
+    image: postgres:13-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      DB_HOST: pgdb
+      DB_PORT: 5432
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,45 @@
+{% extends "unfold/layouts/base.html" %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .err-wrap { display: flex; justify-content: center; padding: 3rem 1rem; }
+    .err-card {
+        width: 100%; max-width: 520px; text-align: center; padding: 2.5rem 2.25rem; border-radius: 16px;
+        border-top: 5px solid var(--c-danger);
+    }
+    .err-icon {
+        width: 76px; height: 76px; border-radius: 9999px; margin: 0 auto 1rem;
+        display: flex; align-items: center; justify-content: center; background: var(--c-danger-tint); color: var(--c-danger);
+    }
+    .err-icon .material-symbols-outlined { font-size: 40px; }
+    .err-code { font-size: 64px; font-weight: 800; line-height: 1; color: var(--c-danger); letter-spacing: -.03em; }
+    .err-title { font-size: 1.25rem; font-weight: 700; margin: .75rem 0 .5rem; }
+    .err-text { font-size: .9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .err-actions { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+    .err-actions .btn-secondary, .err-actions .btn-pdf { cursor: pointer; border: 0; font-family: inherit; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="err-wrap">
+    <div class="err-card bg-white border border-base-200 shadow-xs dark:bg-base-900 dark:border-base-800">
+        <div class="err-icon"><span class="material-symbols-outlined">lock</span></div>
+        <div class="err-code">403</div>
+        <div class="err-title text-font-important-light dark:text-font-important-dark">Доступ заборонено</div>
+        <p class="err-text text-font-subtle-light dark:text-font-subtle-dark">
+            У вас немає прав для перегляду цієї сторінки. Якщо вважаєте, що це помилка — зверніться до адміністратора.
+        </p>
+        <div class="err-actions">
+            <button class="btn-secondary" type="button" onclick="history.length > 1 ? history.back() : location.assign('{% url 'admin_site:index' %}')">
+                <span class="material-symbols-outlined">arrow_back</span> Повернутися назад
+            </button>
+            <a class="btn-pdf" href="{% url 'admin_site:index' %}">
+                <span class="material-symbols-outlined">dashboard</span> На головну
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

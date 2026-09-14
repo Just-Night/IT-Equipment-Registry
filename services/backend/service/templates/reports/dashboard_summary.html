@@ -1,0 +1,154 @@
+{% extends "reports/base_pdf.html" %}
+
+{% block extra_style %}
+    .kpi-grid { display: flex; flex-wrap: wrap; margin-bottom: 6px; }
+    .kpi-card {
+        width: 24.1%; margin: 0 1.2% 8px 0; border: 1px solid var(--line); border-radius: 8px;
+        padding: 8px 10px; border-left: 4px solid var(--accent); page-break-inside: avoid;
+    }
+    .kpi-card:nth-child(4n) { margin-right: 0; }
+    .kpi-card .kpi-value { font-size: 20px; font-weight: bold; color: var(--accent); line-height: 1.1; }
+    .kpi-card .kpi-label { font-size: 8px; color: var(--muted); margin-top: 2px; }
+    .kpi-primary { --accent: var(--primary); }
+    .kpi-success { --accent: var(--success); }
+    .kpi-danger  { --accent: var(--danger); }
+    .kpi-warning { --accent: var(--warning); }
+    .kpi-info    { --accent: var(--info); }
+    .kpi-muted   { --accent: var(--muted); }
+
+    .bar-cell { width: 34%; }
+    .bar { height: 7px; border-radius: 4px; margin: 2px 0; }
+    .bar-incidents { background: var(--primary); }
+    .bar-inspections { background: var(--info); }
+    .legend { font-size: 8px; color: var(--muted); margin-bottom: 6px; }
+    .monthly-section { page-break-inside: avoid; }
+    .legend i { display: inline-block; width: 10px; height: 7px; border-radius: 3px; margin: 0 4px 0 10px; vertical-align: middle; }
+{% endblock %}
+
+{% block content %}
+<section class="kpi-section">
+    <h2 class="section-title">Загальні показники</h2>
+    <div class="kpi-grid">
+        {% for label, value, color in kpi_rows %}
+            <div class="kpi-card kpi-{{ color }}">
+                <div class="kpi-value">{{ value }}</div>
+                <div class="kpi-label">{{ label }}</div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="overdue-section">
+    <h2 class="section-title">Прострочені огляди <span class="count">{{ overdue_rows|length }}</span></h2>
+    {% if overdue_rows %}
+        <table class="overdue-table">
+            <thead>
+                <tr>
+                    <th style="width: 18%">Інв. номер</th>
+                    <th>Назва</th>
+                    <th style="width: 20%">Наступний огляд</th>
+                    <th style="width: 22%">Закріплено за</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in overdue_rows %}
+                    <tr>
+                        <td><strong>{{ row.inventory_number }}</strong></td>
+                        <td>{{ row.name }}</td>
+                        <td class="overdue-date nowrap">{{ row.next_inspection_at }}</td>
+                        <td>{{ row.assigned_to }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-state">Прострочених оглядів немає.</p>
+    {% endif %}
+</section>
+
+<section class="incidents-section">
+    <h2 class="section-title">Відкриті заявки <span class="count">{{ incident_rows|length }}</span></h2>
+    {% if incident_rows %}
+        <table class="incidents-table">
+            <thead>
+                <tr>
+                    <th style="width: 18%">Обладнання</th>
+                    <th>Опис</th>
+                    <th style="width: 15%">Статус</th>
+                    <th style="width: 20%">Створено</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in incident_rows %}
+                    <tr>
+                        <td><strong>{{ row.inventory_number }}</strong></td>
+                        <td>{{ row.description }}</td>
+                        <td><span class="badge badge-{{ row.status_code }}">{{ row.status }}</span></td>
+                        <td class="nowrap">{{ row.created_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-state">Відкритих заявок немає.</p>
+    {% endif %}
+</section>
+
+<section class="warranty-section">
+    <h2 class="section-title">Гарантія спливає до 30 днів <span class="count">{{ warranty_rows|length }}</span></h2>
+    {% if warranty_rows %}
+        <table class="warranty-table">
+            <thead>
+                <tr>
+                    <th style="width: 18%">Інв. номер</th>
+                    <th>Назва</th>
+                    <th style="width: 20%">Гарантія до</th>
+                    <th style="width: 22%">Закріплено за</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in warranty_rows %}
+                    <tr>
+                        <td><strong>{{ row.inventory_number }}</strong></td>
+                        <td>{{ row.name }}</td>
+                        <td class="nowrap {% if row.days_left is not None and row.days_left <= 7 %}warranty-critical{% else %}warranty-soon{% endif %}">
+                            {{ row.warranty_until }}{% if row.days_left is not None %} <span style="font-weight: normal; color: var(--muted)">({{ row.days_left }} дн.)</span>{% endif %}
+                        </td>
+                        <td>{{ row.assigned_to }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-state">Немає обладнання з гарантією, що закінчується.</p>
+    {% endif %}
+</section>
+
+<section class="monthly-section">
+    <h2 class="section-title">Заявки та огляди за останні 12 місяців</h2>
+    <div class="legend"><i class="bar-incidents"></i>Заявки <i class="bar-inspections"></i>Огляди</div>
+    <table class="monthly-table">
+        <thead>
+            <tr>
+                <th style="width: 16%">Місяць</th>
+                <th class="num" style="width: 12%">Заявки</th>
+                <th class="num" style="width: 12%">Огляди</th>
+                <th class="bar-cell"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for month, incidents_count, inspections_count, inc_pct, insp_pct in monthly_rows %}
+                <tr>
+                    <td class="nowrap">{{ month }}</td>
+                    <td class="num">{{ incidents_count }}</td>
+                    <td class="num">{{ inspections_count }}</td>
+                    <td class="bar-cell">
+                        <div class="bar bar-incidents" style="width: {{ inc_pct }}%"></div>
+                        <div class="bar bar-inspections" style="width: {{ insp_pct }}%"></div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

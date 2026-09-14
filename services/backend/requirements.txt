@@ -1,0 +1,42 @@
+Django==5.1.7
+django-cors-headers==4.6.0
+djangorestframework==3.15.2
+djangorestframework-api-key==3.0.0
+psycopg2-binary==2.9.10
+gunicorn==23.0.0
+Pillow==10.4.0
+boto3==1.35.47
+django-storages==1.14.3
+django-filter==24.3
+django-nested-admin==4.0.2
+Faker==27.0.0
+django-debug-toolbar==4.4.6
+ipython==8.25.0
+social-auth-app-django==5.4.2
+requests==2.32.3
+discord.py==2.6.4
+
+# Dashboard
+django-unfold==0.72.0
+
+# Docs
+drf-yasg==1.21.11
+
+# Sentry
+sentry-sdk==2.19.0
+
+# Code quality
+isort==5.13.2
+
+# Project deps (Stage 0)
+django-simple-history==3.7.0
+django-import-export==4.3.3
+openpyxl==3.1.5
+djangorestframework-simplejwt==5.3.1
+pytest==8.3.4
+pytest-django==4.9.0
+factory-boy==3.3.1
+
+# Stage 4b: PDF reports (apps/reports/pdf.py)
+weasyprint==70.0
+pypdf==6.18.1

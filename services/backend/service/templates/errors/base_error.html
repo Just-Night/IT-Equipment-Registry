@@ -1,0 +1,73 @@
+{% comment %}
+Standalone error page (no Unfold layout — must render even when the admin
+context is unavailable). Used by 403.html / 404.html.
+{% endcomment %}<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Помилка{% endblock %}</title>
+<link href="/api/backend-static/unfold/fonts/inter/styles.css" rel="stylesheet">
+<link href="/api/backend-static/unfold/fonts/material-symbols/styles.css" rel="stylesheet">
+<style>
+    :root {
+        --bg: #f8fafc; --card: #ffffff; --ink: #0f172a; --text: #475569; --muted: #94a3b8; --line: #e2e8f0;
+        --primary: #f97316; --primary-dark: #c2410c; --primary-tint: #fff1e6;
+        --accent: #dc2626; --accent-tint: #fdeaea;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #0f172a; --card: #1e293b; --ink: #f1f5f9; --text: #cbd5e1; --muted: #64748b; --line: #334155;
+            --primary-tint: rgba(249,115,22,.16); --accent: #f87171; --accent-tint: rgba(220,38,38,.18);
+        }
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        background: var(--bg); color: var(--text); font-family: Inter, system-ui, sans-serif; padding: 24px;
+    }
+    .card {
+        width: 100%; max-width: 520px; background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+        padding: 40px 36px; text-align: center; box-shadow: 0 20px 50px rgba(15,23,42,.08);
+        border-top: 5px solid var(--accent);
+    }
+    .icon {
+        width: 76px; height: 76px; border-radius: 9999px; margin: 0 auto 18px;
+        display: flex; align-items: center; justify-content: center; background: var(--accent-tint); color: var(--accent);
+    }
+    .icon .material-symbols-outlined { font-size: 40px; }
+    .code { font-size: 64px; font-weight: 800; line-height: 1; color: var(--accent); letter-spacing: -.03em; }
+    h1 { font-size: 20px; font-weight: 700; color: var(--ink); margin: 12px 0 8px; }
+    p { margin: 0 0 24px; font-size: 14px; line-height: 1.6; }
+    .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px;
+        font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer; border: 0; font-family: inherit;
+        transition: transform .12s, box-shadow .12s, background .12s;
+    }
+    .btn-primary { background: linear-gradient(135deg, #ea580c, #c2410c); color: #fff; box-shadow: 0 4px 14px rgba(234,88,12,.35); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(234,88,12,.5); }
+    .btn-secondary { background: var(--primary-tint); color: var(--primary); }
+    .btn-secondary:hover { background: var(--primary); color: #fff; }
+    .btn .material-symbols-outlined { font-size: 20px; }
+    .brand { margin-top: 26px; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+</style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon"><span class="material-symbols-outlined">{% block icon %}error{% endblock %}</span></div>
+        <div class="code">{% block code %}—{% endblock %}</div>
+        <h1>{% block heading %}Помилка{% endblock %}</h1>
+        <p>{% block message %}{% endblock %}</p>
+        <div class="actions">
+            <button class="btn btn-secondary" type="button" onclick="history.length > 1 ? history.back() : location.assign('/admin/')">
+                <span class="material-symbols-outlined">arrow_back</span> Повернутися назад
+            </button>
+            <a class="btn btn-primary" href="/admin/">
+                <span class="material-symbols-outlined">dashboard</span> На головну
+            </a>
+        </div>
+        <div class="brand">{% block brand %}IT Equipment Registry{% endblock %}</div>
+    </div>
+</body>
+</html>

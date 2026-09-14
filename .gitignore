@@ -1,0 +1,26 @@
+# env
+*.env
+*env
+
+# django
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+*media
+*backend-static
+
+# ide
+*.idea/
+
+# mac os
+*.DS_Store
+
+# sandbox
+_sandbox
+sandbox/
+_sandbox/
+
+CLAUDE.md
+PLAN.md

@@ -1,0 +1,80 @@
+{% extends "reports/base_pdf.html" %}
+
+{% block extra_style %}
+    .act-title { text-align: center; margin: 6px 0 18px; }
+    .act-title h1 { font-size: 16px; letter-spacing: .04em; text-transform: uppercase; }
+    .act-title .act-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .act-intro { font-size: 10px; margin-bottom: 14px; line-height: 1.6; }
+    .condition-box { display: flex; align-items: center; gap: 12px; }
+    .condition-box .label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .condition-box .badge { font-size: 11px; padding: 4px 14px; line-height: 18px; }
+    .comment-box { min-height: 60px; }
+    .comment-box .comment-text { white-space: pre-wrap; }
+    .comment-box .label { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+{% endblock %}
+
+{% block content %}
+<div class="act-title">
+    <h1>Акт огляду технічного стану обладнання</h1>
+    <div class="act-sub">№ {{ act_number }} від {{ performed_at }}</div>
+</div>
+
+<p class="act-intro">
+    Цим актом засвідчується, що <strong>{{ performed_at }}</strong> проведено технічний огляд обладнання
+    <strong>{{ equipment.name }}</strong> (інвентарний номер <strong>{{ equipment.inventory_number }}</strong>),
+    що знаходиться за адресою розміщення «{{ equipment.location.name }}».
+</p>
+
+<div class="two-col">
+    <section class="act-info">
+        <h2 class="section-title">Обладнання</h2>
+        <table class="kv-table">
+            <tbody>
+                <tr><th>Інвентарний номер</th><td>{{ equipment.inventory_number }}</td></tr>
+                <tr><th>Назва</th><td>{{ equipment.name }}</td></tr>
+                <tr><th>Категорія</th><td>{{ equipment.category.name }}</td></tr>
+                <tr><th>Локація</th><td>{{ equipment.location.name }}</td></tr>
+                <tr><th>Серійний номер</th><td>{{ equipment.serial_number|default:"—" }}</td></tr>
+            </tbody>
+        </table>
+    </section>
+    <section class="act-meta">
+        <h2 class="section-title">Огляд</h2>
+        <table class="kv-table">
+            <tbody>
+                <tr><th>Номер акта</th><td>{{ act_number }}</td></tr>
+                <tr><th>Дата проведення</th><td>{{ performed_at }}</td></tr>
+                <tr><th>Виконав огляд</th><td>{{ performed_by }}</td></tr>
+                <tr><th>Інтервал оглядів</th><td>{{ equipment.inspection_interval_days }} дн.</td></tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<section class="card card-accent condition-box">
+    <span class="label">Стан обладнання</span>
+    <span class="badge badge-{{ condition_code }}">{{ condition }}</span>
+</section>
+
+<section class="card comment-box">
+    <div class="label">Висновок / коментар техніка</div>
+    <div class="comment-text">{{ comment }}</div>
+</section>
+
+<section class="signature-block">
+    <div class="signature-row">
+        <div class="signature-line technician-signature">
+            <div class="line"></div>
+            <div class="caption">Технік: {{ performed_by }} (підпис)</div>
+        </div>
+        <div class="signature-line responsible-signature">
+            <div class="line"></div>
+            <div class="caption">Відповідальна особа (ПІБ, підпис)</div>
+        </div>
+        <div class="signature-line date-signature">
+            <div class="line"></div>
+            <div class="caption">Дата</div>
+        </div>
+    </div>
+</section>
+{% endblock %}

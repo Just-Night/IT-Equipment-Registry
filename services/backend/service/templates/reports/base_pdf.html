@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+{% comment %}
+Shared shell for all WeasyPrint reports (apps/reports/pdf.py).
+Design: brand orange accent, slate text, zebra tables, tinted status badges.
+Report-specific tweaks go into {% block extra_style %}.
+{% endcomment %}
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}{{ report_title }}{% endblock %}</title>
+<style>
+    /* ---------- Palette ---------- */
+    :root {
+        --primary: #f97316; --primary-dark: #c2410c; --primary-tint: #fff1e6;
+        --ink: #0f172a; --text: #334155; --muted: #64748b; --line: #e2e8f0; --zebra: #f8fafc;
+        --success: #15803d; --success-tint: #dcfce7;
+        --danger:  #b91c1c; --danger-tint:  #fee2e2;
+        --warning: #b45309; --warning-tint: #fef3c7;
+        --info:    #1d4ed8; --info-tint:    #dbeafe;
+        --muted-tint: #e2e8f0;
+    }
+
+    @page {
+        size: A4;
+        margin: 18mm 15mm 18mm 15mm;
+        @top-left {
+            content: "{{ project_name }}";
+            font-family: 'DejaVu Sans', sans-serif; font-size: 8px; color: #94a3b8;
+            border-bottom: 0.5px solid #e2e8f0; width: 100%; padding-bottom: 3mm; vertical-align: bottom;
+        }
+        @top-right {
+            content: "{{ report_title }}";
+            font-family: 'DejaVu Sans', sans-serif; font-size: 8px; color: #94a3b8;
+            vertical-align: bottom; padding-bottom: 3mm; white-space: nowrap; width: 60%;
+        }
+        @bottom-left {
+            content: "Сформовано {{ generated_at }} · {{ generated_by }}";
+            font-family: 'DejaVu Sans', sans-serif; font-size: 8px; color: #94a3b8;
+        }
+        @bottom-right {
+            content: "Сторінка " counter(page) " з " counter(pages);
+            font-family: 'DejaVu Sans', sans-serif; font-size: 8px; color: #94a3b8;
+        }
+    }
+    @page :first { @top-left { content: none; border: 0; } @top-right { content: none; } }
+
+    * { box-sizing: border-box; }
+    body { font-family: 'DejaVu Sans', sans-serif; font-size: 9.5px; line-height: 1.45; color: var(--text); margin: 0; }
+    h1, h2, h3 { margin: 0; color: var(--ink); }
+    p { margin: 0 0 6px; }
+
+    /* ---------- Header ---------- */
+    .report-header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        border-bottom: 3px solid var(--primary); padding-bottom: 10px; margin-bottom: 18px;
+    }
+    .report-header .project-name {
+        font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: .12em; color: var(--primary-dark);
+        margin-bottom: 4px;
+    }
+    .report-header .report-title { font-size: 20px; font-weight: bold; color: var(--ink); line-height: 1.15; }
+    .report-header .report-meta { font-size: 8.5px; color: var(--muted); text-align: right; line-height: 1.6; }
+    .report-header .report-meta strong { color: var(--text); font-weight: normal; }
+
+    /* ---------- Sections ---------- */
+    section { margin-bottom: 16px; page-break-inside: auto; }
+    .section-title {
+        display: block; white-space: nowrap;
+        font-size: 11.5px; font-weight: bold; color: var(--ink);
+        padding-left: 8px; border-left: 3px solid var(--primary);
+        margin: 0 0 8px; page-break-after: avoid;
+    }
+    .section-title .count {
+        display: inline-block; font-size: 8.5px; padding: 0 7px; border-radius: 9px; margin-left: 6px;
+        background: var(--primary-tint); color: var(--primary-dark); line-height: 15px; vertical-align: 1px;
+    }
+
+    /* ---------- Tables ---------- */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+    th, td { padding: 5px 7px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    thead th {
+        font-size: 8px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+        background: var(--zebra); border-bottom: 2px solid var(--primary);
+    }
+    tbody tr:nth-child(even) td { background: var(--zebra); }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    td.nowrap { white-space: nowrap; }
+
+    .kv-table th {
+        width: 34%; font-weight: normal; color: var(--muted); background: transparent;
+        font-size: 9px;
+    }
+    .kv-table td { color: var(--ink); font-weight: normal; }
+    .kv-table tbody tr:nth-child(even) td, .kv-table tbody tr:nth-child(even) th { background: transparent; }
+
+    /* ---------- Badges & highlights ---------- */
+    .badge {
+        display: inline-block; padding: 1px 7px; border-radius: 9px;
+        font-size: 8px; font-weight: bold; line-height: 14px; white-space: nowrap;
+        background: var(--muted-tint); color: var(--text);
+    }
+    .badge-success { background: var(--success-tint); color: var(--success); }
+    .badge-danger  { background: var(--danger-tint);  color: var(--danger); }
+    .badge-warning { background: var(--warning-tint); color: var(--warning); }
+    .badge-info    { background: var(--info-tint);    color: var(--info); }
+    .badge-muted   { background: var(--muted-tint);   color: var(--muted); }
+
+    .overdue-date, .inspection-overdue, .warranty-critical { color: var(--danger); font-weight: bold; }
+    .warranty-soon, .warranty-expiring { color: var(--warning); font-weight: bold; }
+    .empty-state {
+        color: var(--muted); font-style: italic; padding: 8px 10px;
+        background: var(--zebra); border: 1px dashed var(--line); border-radius: 6px;
+    }
+
+    /* ---------- Cards ---------- */
+    .card {
+        border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+        page-break-inside: avoid;
+    }
+    .card-accent { border-left: 4px solid var(--primary); }
+    .two-col { display: flex; gap: 12px; }
+    .two-col > * { flex: 1 1 0; min-width: 0; }
+
+    /* ---------- Signatures ---------- */
+    .signature-block { margin-top: 28px; page-break-inside: avoid; }
+    .signature-row { display: flex; gap: 24px; margin-top: 26px; }
+    .signature-line { flex: 1 1 0; }
+    .signature-line .line { border-bottom: 1px solid var(--ink); height: 18px; }
+    .signature-line .caption { font-size: 8px; color: var(--muted); margin-top: 3px; }
+
+    {% block extra_style %}{% endblock %}
+</style>
+</head>
+<body>
+    <header class="report-header">
+        <div class="report-header-main">
+            <div class="project-name">{{ project_name }}</div>
+            <div class="report-title">{{ report_title }}</div>
+        </div>
+        <div class="report-meta">
+            <div class="generated-at">Сформовано: <strong>{{ generated_at }}</strong></div>
+            <div class="generated-by">Користувач: <strong>{{ generated_by }}</strong></div>
+        </div>
+    </header>
+
+    <main class="report-body">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

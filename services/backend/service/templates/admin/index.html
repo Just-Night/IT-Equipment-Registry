@@ -1,0 +1,139 @@
+{% extends "unfold/layouts/base.html" %}
+{% load unfold %}
+
+{% block extrastyle %}
+{{ block.super }}
+{# Unfold ships precompiled Tailwind, so dashboard styling is plain CSS. Dark mode: `html.dark`. #}
+<style>
+    :root {
+        --c-primary: #f97316; --c-primary-tint: #fff1e6;
+        --c-success: #16a34a; --c-success-tint: #e7f7ec;
+        --c-danger:  #dc2626; --c-danger-tint:  #fdeaea;
+        --c-rose:    #e11d48; --c-rose-tint:    #fde7ec;
+        --c-warning: #d97706; --c-warning-tint: #fdf1dc;
+        --c-info:    #2563eb; --c-info-tint:    #e6eefd;
+        --c-muted:   #64748b; --c-muted-tint:   #eef2f6;
+    }
+    html.dark {
+        --c-primary-tint: rgba(249,115,22,.16); --c-success-tint: rgba(22,163,74,.18);
+        --c-danger-tint:  rgba(220,38,38,.18);  --c-rose-tint:    rgba(225,29,72,.18);
+        --c-warning-tint: rgba(217,119,6,.18);  --c-info-tint:    rgba(37,99,235,.2);
+        --c-muted-tint:   rgba(100,116,139,.2);
+        --c-success: #4ade80; --c-danger: #f87171; --c-rose: #fb7185;
+        --c-warning: #fbbf24; --c-info: #60a5fa; --c-muted: #94a3b8;
+    }
+
+    /* KPI cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+    .kpi-card { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem;
+                border-left: 4px solid var(--accent); transition: transform .15s, box-shadow .15s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15,23,42,.08); }
+    .kpi-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+                width: 3rem; height: 3rem; border-radius: 9999px;
+                background: var(--tint); color: var(--accent); }
+    .kpi-icon .material-symbols-outlined { font-size: 1.75rem; line-height: 1; }
+    .kpi-value { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+    .kpi-title { font-size: .8rem; margin-top: .25rem; }
+    .kpi-primary { --accent: var(--c-primary); --tint: var(--c-primary-tint); }
+    .kpi-success { --accent: var(--c-success); --tint: var(--c-success-tint); }
+    .kpi-danger  { --accent: var(--c-danger);  --tint: var(--c-danger-tint); }
+    .kpi-rose    { --accent: var(--c-rose);    --tint: var(--c-rose-tint); }
+    .kpi-warning { --accent: var(--c-warning); --tint: var(--c-warning-tint); }
+    .kpi-info    { --accent: var(--c-info);    --tint: var(--c-info-tint); }
+
+    /* Section headers */
+    .section-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+    .section-head .material-symbols-outlined { font-size: 1.25rem; color: var(--accent); }
+    .section-title { font-size: 1rem; font-weight: 600; }
+    .section-count { font-size: .75rem; font-weight: 600; padding: .1rem .55rem; border-radius: 9999px;
+                     background: var(--tint); color: var(--accent); }
+
+    /* Badges + highlighted dates inside tables */
+    .badge { display: inline-block; padding: .15rem .6rem; border-radius: 9999px;
+             font-size: .75rem; font-weight: 600; line-height: 1.25; white-space: nowrap;
+             background: var(--tint); color: var(--accent); }
+    .badge-info    { --accent: var(--c-info);    --tint: var(--c-info-tint); }
+    .badge-warning { --accent: var(--c-warning); --tint: var(--c-warning-tint); }
+    .badge-success { --accent: var(--c-success); --tint: var(--c-success-tint); }
+    .badge-danger  { --accent: var(--c-danger);  --tint: var(--c-danger-tint); }
+    .badge-muted   { --accent: var(--c-muted);   --tint: var(--c-muted-tint); }
+    .date-danger  { color: var(--c-danger);  font-weight: 600; }
+    .date-warning { color: var(--c-warning); font-weight: 600; }
+    .date-danger small, .date-warning small { font-weight: 400; opacity: .8; }
+    .dash-table a { color: var(--c-primary); font-weight: 600; }
+    .dash-table a:hover { text-decoration: underline; }
+    .dash-table .btn-open {
+        display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .7rem; border-radius: 9999px;
+        font-size: .75rem; font-weight: 600; white-space: nowrap; text-decoration: none;
+        background: var(--c-primary-tint); color: var(--c-primary); transition: background .12s, color .12s;
+    }
+    .dash-table .btn-open:hover { background: var(--c-primary); color: #fff; text-decoration: none; }
+    .dash-table .btn-open .material-symbols-outlined { font-size: 1rem; }
+
+    .empty-state { display: flex; align-items: center; justify-content: center; gap: .5rem;
+                   padding: 1.25rem; font-size: .85rem; }
+    .empty-state .material-symbols-outlined { font-size: 1.25rem; color: var(--c-success); }
+
+    .dash-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .dash-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; }
+    .dash-subtitle { font-size: .8rem; margin-top: .15rem; }
+
+    .chart-card { padding: 1.25rem; }
+    .chart-card .relative { height: 280px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 pb-6">
+    <div class="dash-toolbar">
+        <div>
+            <div class="dash-title text-font-important-light dark:text-font-important-dark">Огляд стану обладнання</div>
+            <div class="dash-subtitle text-font-subtle-light dark:text-font-subtle-dark">Станом на {% now "d.m.Y H:i" %}</div>
+        </div>
+        <a class="btn-pdf" href="{% url 'admin_site:reports_summary_pdf' %}" target="_blank">
+            <span class="material-symbols-outlined">picture_as_pdf</span> Зведений звіт (PDF)
+        </a>
+    </div>
+
+    <div class="kpi-grid">
+        {% for card in kpi_cards %}
+            <div class="kpi-card kpi-{{ card.color }} bg-white border border-base-200 rounded-default shadow-xs dark:bg-base-900 dark:border-base-800">
+                <div class="kpi-icon">
+                    <span class="material-symbols-outlined">{{ card.icon }}</span>
+                </div>
+                <div>
+                    <div class="kpi-value text-font-important-light dark:text-font-important-dark">{{ card.value }}</div>
+                    <div class="kpi-title text-font-subtle-light dark:text-font-subtle-dark">{{ card.title }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% for entry in report_tables %}
+        <div class="dash-table kpi-{{ entry.color }}">
+            <div class="section-head">
+                <span class="material-symbols-outlined">{{ entry.icon }}</span>
+                <h3 class="section-title text-font-important-light dark:text-font-important-dark">{{ entry.title }}</h3>
+                <span class="section-count">{{ entry.count }}</span>
+            </div>
+            {% if entry.table.rows %}
+                {% component "unfold/components/table.html" with table=entry.table striped=1 %}{% endcomponent %}
+            {% else %}
+                <p class="empty-state bg-white border border-base-200 rounded-default shadow-xs text-font-subtle-light dark:bg-base-900 dark:border-base-800 dark:text-font-subtle-dark">
+                    <span class="material-symbols-outlined">task_alt</span> Немає даних
+                </p>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="kpi-primary">
+        <div class="section-head">
+            <span class="material-symbols-outlined">bar_chart</span>
+            <h3 class="section-title text-font-important-light dark:text-font-important-dark">Заявки та огляди за останні 12 місяців</h3>
+        </div>
+        <div class="chart-card bg-white border border-base-200 rounded-default shadow-xs dark:bg-base-900 dark:border-base-800">
+            {% component "unfold/components/chart/bar.html" with data=chart_data %}{% endcomponent %}
+        </div>
+    </div>
+</div>
+{% endblock %}

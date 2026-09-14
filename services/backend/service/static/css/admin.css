@@ -1,0 +1,150 @@
+/* Project-wide admin styling on top of django-unfold (loaded via UNFOLD["STYLES"]).
+   Unfold ships precompiled Tailwind, so everything here is plain CSS.
+   Dark mode: `html.dark`. Dashboard-only styles live in templates/admin/index.html. */
+
+:root {
+    --c-primary: #f97316; --c-primary-tint: #fff1e6;
+    --c-success: #16a34a; --c-success-tint: #e7f7ec;
+    --c-danger:  #dc2626; --c-danger-tint:  #fdeaea;
+    --c-warning: #d97706; --c-warning-tint: #fdf1dc;
+    --c-info:    #2563eb; --c-info-tint:    #e6eefd;
+    --c-violet:  #7c3aed; --c-violet-tint:  #efe9fd;
+    --c-teal:    #0d9488; --c-teal-tint:    #e0f5f2;
+    --sidebar-mini-width: 76px;
+}
+html.dark {
+    --c-primary-tint: rgba(249,115,22,.16); --c-success-tint: rgba(22,163,74,.18);
+    --c-danger-tint:  rgba(220,38,38,.18);  --c-warning-tint: rgba(217,119,6,.18);
+    --c-info-tint:    rgba(37,99,235,.2);   --c-violet-tint:  rgba(124,58,237,.2);
+    --c-teal-tint:    rgba(13,148,136,.2);
+    --c-success: #4ade80; --c-danger: #f87171; --c-warning: #fbbf24;
+    --c-info: #60a5fa; --c-violet: #a78bfa; --c-teal: #2dd4bf;
+}
+
+/* ---------- Sidebar: colored icons per section ---------- */
+#nav-sidebar-inner li a { transition: background .12s, color .12s; }
+#nav-sidebar-inner li a .material-symbols-outlined {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; margin-right: .6rem; border-radius: 8px;
+    font-size: 18px; background: var(--tint); color: var(--accent);
+}
+#nav-sidebar-inner li a[href*="/apps/category/"]   { --accent: var(--c-violet);  --tint: var(--c-violet-tint); }
+#nav-sidebar-inner li a[href*="/apps/location/"]   { --accent: var(--c-teal);    --tint: var(--c-teal-tint); }
+#nav-sidebar-inner li a[href*="/apps/equipment/"]  { --accent: var(--c-primary); --tint: var(--c-primary-tint); }
+#nav-sidebar-inner li a[href*="/apps/inspection/"] { --accent: var(--c-success); --tint: var(--c-success-tint); }
+#nav-sidebar-inner li a[href*="/apps/incident/"]   { --accent: var(--c-danger);  --tint: var(--c-danger-tint); }
+#nav-sidebar-inner li a[href*="/auth/user/"]       { --accent: var(--c-info);    --tint: var(--c-info-tint); }
+#nav-sidebar-inner li a[href*="/auth/group/"]      { --accent: var(--c-warning); --tint: var(--c-warning-tint); }
+#nav-sidebar-inner li a:hover { background: var(--tint); color: var(--accent); }
+#nav-sidebar-inner li a.font-semibold {            /* active item (Unfold adds font-semibold) */
+    background: var(--tint); color: var(--accent);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+#nav-sidebar-inner h2 { text-transform: uppercase; letter-spacing: .06em; font-size: .7rem; opacity: .75; }
+
+/* ---------- Sidebar: collapse to icon rail ---------- */
+@media (min-width: 1280px) {
+    .sidebar-wrap, #nav-sidebar { transition: width .2s ease; }
+    .sidebar-mini, .sidebar-mini #nav-sidebar { width: var(--sidebar-mini-width) !important; }
+    .sidebar-mini #site-name,
+    .sidebar-mini #nav-sidebar-inner h2,
+    .sidebar-mini #nav-sidebar-inner li a > span:not(.material-symbols-outlined),
+    .sidebar-mini #nav-filter,
+    .sidebar-mini .mb-2\.5.mx-3 kbd,
+    .sidebar-mini [x-data="searchDropdown()"] > div:not(:first-child) { display: none !important; }
+    .sidebar-mini [x-data="searchDropdown()"] > div:first-child { padding: 0; justify-content: center; height: 38px; }
+    .sidebar-mini [x-data="searchDropdown()"] { margin-left: .5rem; margin-right: .5rem; }
+    .sidebar-mini #nav-sidebar-inner ol { padding-left: .5rem; padding-right: .5rem; }
+    .sidebar-mini #nav-sidebar-inner li a { margin: 0; padding: 0; justify-content: center; }
+    .sidebar-mini #nav-sidebar-inner li a .material-symbols-outlined { margin: 0; width: 38px; height: 38px; font-size: 22px; }
+    .sidebar-mini #nav-sidebar-inner .border-b > div:first-child { padding: 0; justify-content: center; }
+    .sidebar-mini #nav-sidebar-inner .border-b > div:first-child > div { display: none; }
+    /* Sticky changelist action bar: keep it aligned with the rail instead of ml-0. */
+    html:has(.sidebar-mini) #changelist-actions-wrapper { margin-left: var(--sidebar-mini-width) !important; }
+}
+
+/* ---------- Changelist ---------- */
+/* Background on the row (not only th): Unfold's row-actions column has no header cell. */
+#result_list thead tr, #result_list thead th {
+    background: var(--c-primary-tint); box-shadow: inset 0 -2px 0 var(--c-primary);
+}
+#result_list thead th { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+html.dark #result_list thead tr, html.dark #result_list thead th { background: rgba(249,115,22,.10); }
+#result_list tbody tr:hover > td, #result_list tbody tr:hover > th { background: var(--c-primary-tint); }
+html.dark #result_list tbody tr:hover > td, html.dark #result_list tbody tr:hover > th { background: rgba(255,255,255,.04); }
+#result_list tbody th a, #result_list tbody td a:not(.button):not([class*="bg-"]) { color: var(--c-primary); font-weight: 600; }
+#result_list tbody th a:hover, #result_list tbody td a:hover { text-decoration: underline; }
+/* Status/condition badges from `@display(label=...)` — a bit larger, pill-shaped */
+#result_list td span.uppercase.rounded-default { border-radius: 9999px; padding: 0 .65rem; font-size: 11px; letter-spacing: .04em; }
+/* Row actions menu items */
+.changelist-actions .material-symbols-outlined, #result_list .material-symbols-outlined { color: var(--c-primary); }
+
+/* ---------- Filters drawer ---------- */
+#changelist-filter h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--c-primary); }
+#changelist-filter li.font-semibold { background: var(--c-primary-tint); }
+html.dark #changelist-filter li.font-semibold { background: rgba(249,115,22,.14); }
+
+/* ---------- Change form ---------- */
+fieldset.module > h2 {
+    border-left: 4px solid var(--c-primary); padding-left: .75rem !important;
+    background: linear-gradient(90deg, var(--c-primary-tint), transparent 60%) !important;
+    font-size: .95rem;
+}
+html.dark fieldset.module > h2 { background: linear-gradient(90deg, rgba(249,115,22,.14), transparent 60%) !important; }
+/* Inline (tab) headings share the fieldset look */
+.inline-group h2, [id$="-heading"] {
+    border-left: 4px solid var(--c-info); padding-left: .75rem !important;
+    background: linear-gradient(90deg, var(--c-info-tint), transparent 60%) !important;
+}
+html.dark .inline-group h2, html.dark [id$="-heading"] { background: linear-gradient(90deg, rgba(37,99,235,.16), transparent 60%) !important; }
+/* Field labels */
+.form-row label.font-semibold { color: var(--c-primary-dark, #9a3412); letter-spacing: .01em; }
+html.dark .form-row label.font-semibold { color: #fdba74; }
+/* Readonly values: soft tinted box */
+.form-row .readonly { background: var(--c-primary-tint) !important; border-color: transparent !important; }
+html.dark .form-row .readonly { background: rgba(249,115,22,.08) !important; }
+/* Boolean readonly icons: larger + colored */
+.readonly img[alt="True"], .readonly img[alt="False"] { width: 22px; height: 22px; border-radius: 9999px; padding: 3px; }
+.readonly img[alt="True"]  { background: var(--c-success-tint); }
+.readonly img[alt="False"] { background: var(--c-danger-tint); }
+/* Inputs: orange focus ring already; make selects/inputs border warmer on hover */
+.form-row input:not([type="checkbox"]):hover, .form-row select:hover, .form-row textarea:hover { border-color: var(--c-primary) !important; }
+/* Help text / errors */
+.help, .help-block { color: var(--c-info); }
+.errornote, ul.errorlist li { border-left: 4px solid var(--c-danger); padding-left: .5rem; }
+/* Tabs (fieldset tabs + inline tabs) */
+.form-row .tabs a, nav[aria-label="Tabs"] a { transition: color .12s; }
+
+/* ---------- Submit row ---------- */
+#submit-row button[name="_save"] {
+    background: linear-gradient(135deg, #ea580c, #c2410c) !important;
+    box-shadow: 0 4px 14px rgba(234,88,12,.35); font-weight: 600; letter-spacing: .01em;
+    text-shadow: 0 1px 1px rgba(0,0,0,.25);
+}
+#submit-row button[name="_save"]:hover { box-shadow: 0 6px 18px rgba(249,115,22,.45); transform: translateY(-1px); }
+#submit-row a[href$="/delete/"], #submit-row .deletelink {
+    color: var(--c-danger) !important; border-color: var(--c-danger) !important; background: var(--c-danger-tint) !important;
+}
+
+/* ---------- Detail / row action buttons (PDF etc.) ---------- */
+a[href$="-pdf/"] .material-symbols-outlined { color: var(--c-danger); }
+
+/* ---------- Header ---------- */
+header .material-symbols-outlined:hover { color: var(--c-primary); }
+header h1, #site-name a { letter-spacing: -.01em; }
+
+/* ---------- Generic button-ish links used in our own templates ---------- */
+.btn-pdf {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .55rem 1rem; border-radius: 10px;
+    font-weight: 600; font-size: .85rem; color: #fff; text-decoration: none;
+    background: linear-gradient(135deg, #ea580c, #c2410c); box-shadow: 0 4px 14px rgba(234,88,12,.35);
+    text-shadow: 0 1px 1px rgba(0,0,0,.25); transition: transform .12s, box-shadow .12s;
+}
+.btn-pdf:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(234,88,12,.5); color: #fff; }
+.btn-pdf .material-symbols-outlined { font-size: 1.2rem; }
+.btn-secondary {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .55rem 1rem; border-radius: 10px;
+    font-weight: 600; font-size: .85rem; text-decoration: none;
+    background: var(--c-primary-tint); color: var(--c-primary);
+}
+.btn-secondary:hover { background: var(--c-primary); color: #fff; }

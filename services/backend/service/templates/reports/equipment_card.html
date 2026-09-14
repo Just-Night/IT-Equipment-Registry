@@ -1,0 +1,152 @@
+{% extends "reports/base_pdf.html" %}
+
+{% block extra_style %}
+    .hero { display: flex; justify-content: space-between; align-items: flex-start; }
+    .hero .inv { font-size: 8.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .hero .name { font-size: 15px; font-weight: bold; color: var(--ink); margin: 2px 0 4px; }
+    .hero .sub { font-size: 9px; color: var(--muted); }
+    .hero .badge { font-size: 9px; padding: 3px 10px; line-height: 16px; }
+    .flags { margin-top: 6px; }
+    .flags .badge { margin-right: 4px; }
+{% endblock %}
+
+{% block content %}
+<section class="card card-accent hero">
+    <div>
+        <div class="inv">Інвентарний номер {{ equipment.inventory_number }}</div>
+        <div class="name">{{ equipment.name }}</div>
+        <div class="sub">{{ equipment.category.name }} · {{ equipment.location.name }}
+            {% if equipment.manufacturer %} · {{ equipment.manufacturer }}{% endif %}
+            {% if equipment.model_name %} {{ equipment.model_name }}{% endif %}</div>
+        <div class="flags">
+            {% if is_inspection_overdue %}<span class="badge badge-danger">Огляд прострочено</span>{% endif %}
+            {% if is_warranty_expiring %}<span class="badge badge-warning">Гарантія спливає</span>{% endif %}
+        </div>
+    </div>
+    <span class="badge badge-{{ status_code }}">{{ equipment.get_status_display }}</span>
+</section>
+
+<div class="two-col">
+    <section class="equipment-attributes">
+        <h2 class="section-title">Основні дані</h2>
+        <table class="kv-table">
+            <tbody>
+                <tr><th>Категорія</th><td>{{ equipment.category.name }}</td></tr>
+                <tr><th>Локація</th><td>{{ equipment.location.name }}</td></tr>
+                <tr><th>Виробник</th><td>{{ equipment.manufacturer|default:"—" }}</td></tr>
+                <tr><th>Модель</th><td>{{ equipment.model_name|default:"—" }}</td></tr>
+                <tr><th>Серійний номер</th><td>{{ equipment.serial_number|default:"—" }}</td></tr>
+                <tr><th>Закріплено за</th><td>{{ assigned_to }}</td></tr>
+                <tr><th>Примітка</th><td>{{ equipment.note|default:"—" }}</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="warranty-inspection">
+        <h2 class="section-title">Гарантія та огляди</h2>
+        <table class="kv-table">
+            <tbody>
+                <tr><th>Дата придбання</th><td>{{ purchase_date }}</td></tr>
+                <tr>
+                    <th>Гарантія до</th>
+                    <td class="{% if is_warranty_expiring %}warranty-expiring{% endif %}">{{ warranty_until }}</td>
+                </tr>
+                <tr><th>Інтервал оглядів</th><td>{{ equipment.inspection_interval_days }} дн.</td></tr>
+                <tr><th>Останній огляд</th><td>{{ last_inspection_at }}</td></tr>
+                <tr>
+                    <th>Наступний огляд</th>
+                    <td class="{% if is_inspection_overdue %}inspection-overdue{% endif %}">{{ next_inspection_at }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</div>
+
+<section class="inspections-history">
+    <h2 class="section-title">Останні огляди <span class="count">{{ inspections|length }}</span></h2>
+    {% if inspections %}
+        <table class="inspections-table">
+            <thead>
+                <tr>
+                    <th style="width: 20%">Дата</th>
+                    <th style="width: 18%">Виконав</th>
+                    <th style="width: 16%">Стан</th>
+                    <th>Коментар</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in inspections %}
+                    <tr>
+                        <td class="nowrap">{{ row.performed_at }}</td>
+                        <td>{{ row.performed_by }}</td>
+                        <td><span class="badge badge-{{ row.condition_code }}">{{ row.condition }}</span></td>
+                        <td>{{ row.comment }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-state">Оглядів ще не проводилося.</p>
+    {% endif %}
+</section>
+
+<section class="incidents-history">
+    <h2 class="section-title">Заявки на несправність <span class="count">{{ incidents|length }}</span></h2>
+    {% if incidents %}
+        <table class="incidents-table">
+            <thead>
+                <tr>
+                    <th style="width: 15%">Створено</th>
+                    <th style="width: 13%">Статус</th>
+                    <th style="width: 12%">Повідомив</th>
+                    <th style="width: 12%">Призначено</th>
+                    <th>Опис</th>
+                    <th style="width: 15%">Вирішено</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in incidents %}
+                    <tr>
+                        <td class="nowrap">{{ row.created_at }}</td>
+                        <td><span class="badge badge-{{ row.status_code }}">{{ row.status }}</span></td>
+                        <td>{{ row.reported_by }}</td>
+                        <td>{{ row.assigned_to }}</td>
+                        <td>{{ row.description }}{% if row.resolution != "—" %}<br><em style="color: var(--muted)">Рішення: {{ row.resolution }}</em>{% endif %}</td>
+                        <td class="nowrap">{{ row.resolved_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-state">Заявок на несправність не зареєстровано.</p>
+    {% endif %}
+</section>
+
+<section class="status-history">
+    <h2 class="section-title">Історія змін <span class="count">{{ history|length }}</span></h2>
+    {% if history %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th style="width: 22%">Дата</th>
+                    <th style="width: 25%">Користувач</th>
+                    <th style="width: 20%">Тип зміни</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in history %}
+                    <tr>
+                        <td class="nowrap">{{ row.date }}</td>
+                        <td>{{ row.user }}</td>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="empty-state">Історія змін відсутня.</p>
+    {% endif %}
+</section>
+{% endblock %}
